@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package items;
+
+option go_package = "go-service/grpc/pb";
+
+service ItemService {
+    rpc GetItem (GetItemRequest) returns (ItemResponse);
+    rpc CreateItem (CreateItemRequest) returns (ItemResponse);
+}
+
+message GetItemRequest {
+    string id = 1;
+}
+
+message CreateItemRequest {
+    string name = 1;
+    double price = 2;
+}
+
+message ItemResponse {
+    string id = 1;
+    string name = 2;
+    double price = 3;
+}
