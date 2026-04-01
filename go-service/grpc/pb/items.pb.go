@@ -194,7 +194,7 @@ const file_items_proto_rawDesc = "" +
 	"\vItemService\x125\n" +
 	"\aGetItem\x12\x15.items.GetItemRequest\x1a\x13.items.ItemResponse\x12;\n" +
 	"\n" +
-	"CreateItem\x12\x18.items.CreateItemRequest\x1a\x13.items.ItemResponseB\x14Z\x12go-service/grpc/pbb\x06proto3"
+	"CreateItem\x12\x18.items.CreateItemRequest\x1a\x13.items.ItemResponseB\tZ\agrpc/pbb\x06proto3"
 
 var (
 	file_items_proto_rawDescOnce sync.Once
