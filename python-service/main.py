@@ -92,11 +92,14 @@ async def proxy_get_item(item_id: str):
         # Возвращаем данные от Go-сервиса
         return response.json()
         
+    except HTTPException:
+        # Пробрасываем HTTP исключения как есть
+        raise
     except httpx.ConnectError:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Go service is not available"
-        )
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="Go service is not available"
+    )
     except httpx.TimeoutException:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
@@ -111,9 +114,7 @@ async def proxy_get_item(item_id: str):
 # Новый эндпоинт: gRPC прокси к Go-сервису
 @app.get("/grpc-items/{item_id}")
 async def grpc_get_item(item_id: str):
-    """
-    Получить элемент из Go-сервиса через gRPC
-    """
+    """Получить элемент из Go-сервиса через gRPC"""
     global grpc_client
     
     try:
@@ -127,7 +128,10 @@ async def grpc_get_item(item_id: str):
         
         return item
         
+    except HTTPException:
+        raise
     except Exception as e:
+        # Любая другая ошибка - это 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"gRPC error: {str(e)}"

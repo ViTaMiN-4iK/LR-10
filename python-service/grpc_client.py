@@ -1,5 +1,4 @@
 import grpc
-import asyncio
 import os
 from typing import Optional
 import items_pb2
@@ -7,13 +6,13 @@ import items_pb2_grpc
 
 class GoGrpcClient:
     def __init__(self, host: str = None, port: int = None):
-        # Используем переменные окружения или значения по умолчанию
+        """Инициализация gRPC клиента"""
         self.host = host or os.getenv("GO_SERVICE_HOST", "localhost")
         self.port = port or int(os.getenv("GO_SERVICE_GRPC_PORT", "50051"))
         self.channel = grpc.aio.insecure_channel(f"{self.host}:{self.port}")
         self.stub = items_pb2_grpc.ItemServiceStub(self.channel)
     
-    async def get_item(self, item_id: str):
+    async def get_item(self, item_id: str) -> Optional[dict]:
         """Получить элемент по ID через gRPC"""
         try:
             request = items_pb2.GetItemRequest(id=item_id)
@@ -26,9 +25,9 @@ class GoGrpcClient:
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.NOT_FOUND:
                 return None
-            raise
+            raise Exception(f"gRPC error ({e.code()}): {e.details()}")
     
-    async def create_item(self, name: str, price: float):
+    async def create_item(self, name: str, price: float) -> dict:
         """Создать элемент через gRPC"""
         try:
             request = items_pb2.CreateItemRequest(name=name, price=price)
@@ -39,7 +38,8 @@ class GoGrpcClient:
                 "price": response.price
             }
         except grpc.RpcError as e:
-            raise
+            raise Exception(f"gRPC error ({e.code()}): {e.details()}")
     
     async def close(self):
+        """Закрыть gRPC канал"""
         await self.channel.close()
