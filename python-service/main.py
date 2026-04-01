@@ -1,7 +1,7 @@
 import uuid
 import asyncio
 from contextlib import asynccontextmanager
-
+import httpx
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
 
@@ -15,10 +15,12 @@ storage = ItemStorage()
 async def lifespan(app: FastAPI):
     # Startup
     print("Starting up FastAPI server...")
+    # Создаем клиент для Go-сервиса
+    app.state.go_client = httpx.AsyncClient(base_url="http://localhost:8080")
     yield
     # Shutdown
     print("Shutting down FastAPI server...")
-    # Здесь можно добавить очистку ресурсов
+    await app.state.go_client.aclose()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -54,6 +56,44 @@ async def get_item(item_id: str):
         )
     
     return item
+
+# Новый эндпоинт: прокси к Go-сервису
+@app.get("/proxy-items/{item_id}")
+async def proxy_get_item(item_id: str):
+    """
+    Прокси-запрос к Go-сервису для получения элемента по ID
+    """
+    try:
+        # Вызываем Go-сервис
+        response = await app.state.go_client.get(f"/items/{item_id}")
+        
+        # Проверяем статус ответа
+        if response.status_code == 404:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Item {item_id} not found in Go service"
+            )
+        
+        response.raise_for_status()
+        
+        # Возвращаем данные от Go-сервиса
+        return response.json()
+        
+    except httpx.ConnectError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Go service is not available"
+        )
+    except httpx.TimeoutException:
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail="Go service timeout"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error communicating with Go service: {str(e)}"
+        )
 
 # Для запуска через скрипт
 if __name__ == "__main__":
