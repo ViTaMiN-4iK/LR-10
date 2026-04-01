@@ -1,0 +1,33 @@
+services:
+  go-service:
+    build:
+      context: .
+      dockerfile: go-service/Dockerfile
+    container_name: go-service
+    ports:
+      - "8080:8080"
+      - "50051:50051"
+    networks:
+      - backend
+    restart: unless-stopped
+
+  python-service:
+    build:
+      context: .
+      dockerfile: python-service/Dockerfile
+    container_name: python-service
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+    depends_on:
+      - go-service
+    environment:
+      - GO_SERVICE_HOST=go-service
+      - GO_SERVICE_GRPC_PORT=50051
+      - GO_SERVICE_REST_PORT=8080
+    restart: unless-stopped
+
+networks:
+  backend:
+    driver: bridge
