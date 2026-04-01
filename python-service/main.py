@@ -2,6 +2,7 @@ import uuid
 import asyncio
 from contextlib import asynccontextmanager
 import httpx
+import os
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
 
@@ -18,11 +19,13 @@ async def lifespan(app: FastAPI):
     # Startup
     print("Starting up FastAPI server...")
     # Создаем HTTP клиент для Go-сервиса (REST)
-    app.state.go_client = httpx.AsyncClient(base_url="http://localhost:8080")
+    go_host = os.getenv("GO_SERVICE_HOST", "localhost")
+    go_rest_port = os.getenv("GO_SERVICE_REST_PORT", "8080")
+    app.state.go_client = httpx.AsyncClient(base_url=f"http://{go_host}:{go_rest_port}")
     
     # Создаем gRPC клиент для Go-сервиса
     global grpc_client
-    grpc_client = GoGrpcClient(host="localhost", port=50051)
+    grpc_client = GoGrpcClient()  # теперь читает переменные окружения автоматически
     
     yield
     

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package items;
 
-option go_package = "go-service/grpc/pb";
+option go_package = "grpc/pb";
 
 service ItemService {
     rpc GetItem (GetItemRequest) returns (ItemResponse);

@@ -1,9 +1,10 @@
 # Go
 go-service/go.sum
 go-service/go-service
-*.exe
-*.test
-*.out
+go-service/*.exe
+go-service/*.test
+go-service/*.out
+go-service/main.exe
 
 # Python
 __pycache__/
@@ -14,6 +15,7 @@ __pycache__/
 env/
 venv/
 .venv/
+.env
 *.egg-info/
 dist/
 build/
@@ -29,15 +31,14 @@ htmlcov/
 *~
 .DS_Store
 
-# Environment
-.env
-.env.local
-.env.*.local
-
-# Logs
-*.log
-logs/
-
 # Temporary files
 tmp/
 temp/
+*.log
+
+# Docker (если не хотите коммитить большие файлы)
+# но Dockerfile и docker-compose.yml должны быть в репозитории
+
+# OS
+Thumbs.db
+desktop.ini

@@ -37,7 +37,6 @@ func (s *ItemServer) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.I
 }
 
 func (s *ItemServer) CreateItem(ctx context.Context, req *pb.CreateItemRequest) (*pb.ItemResponse, error) {
-	// Генерируем UUID
 	itemID := uuid.New().String()
 
 	item := models.Item{

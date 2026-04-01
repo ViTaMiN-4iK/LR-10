@@ -1,12 +1,16 @@
 import grpc
 import asyncio
+import os
 from typing import Optional
 import items_pb2
 import items_pb2_grpc
 
 class GoGrpcClient:
-    def __init__(self, host: str = "localhost", port: int = 50051):
-        self.channel = grpc.aio.insecure_channel(f"{host}:{port}")
+    def __init__(self, host: str = None, port: int = None):
+        # Используем переменные окружения или значения по умолчанию
+        self.host = host or os.getenv("GO_SERVICE_HOST", "localhost")
+        self.port = port or int(os.getenv("GO_SERVICE_GRPC_PORT", "50051"))
+        self.channel = grpc.aio.insecure_channel(f"{self.host}:{self.port}")
         self.stub = items_pb2_grpc.ItemServiceStub(self.channel)
     
     async def get_item(self, item_id: str):
